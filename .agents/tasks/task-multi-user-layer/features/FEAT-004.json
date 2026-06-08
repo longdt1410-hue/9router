@@ -1,0 +1,30 @@
+{
+  "id": "FEAT-004",
+  "type": "feat",
+  "description": "Create Playwright end-to-end tests covering the full multi-user flow: registration, login, key management, usage tracking, and quota enforcement. Tests run against the actual dev server with MULTI_USER_MODE=true.",
+  "status": "pending",
+  "steps": [
+    "Step 1: Install Playwright as a dev dependency in the project root: npm install -D @playwright/test. Create playwright.config.js at project root with baseURL http://localhost:20128, webServer config to start the dev server with MULTI_USER_MODE=true DATA_DIR=./test-data.",
+    "Step 2: Create tests/e2e/multi-user/registration.spec.js - Test user registration flow: POST /api/multi/register with valid data returns 201 + token; duplicate username returns 409; invalid password returns 400; when MULTI_USER_REGISTRATION=false returns 403.",
+    "Step 3: Create tests/e2e/multi-user/login.spec.js - Test login flow: POST /api/multi/login with valid credentials returns token; wrong password returns 401; non-existent user returns 401.",
+    "Step 4: Create tests/e2e/multi-user/keys.spec.js - Test key management: create key (POST /api/multi/keys), list keys (GET /api/multi/keys), delete key (DELETE /api/multi/keys?id=xxx). Verify max keys limit. Verify unauthorized access returns 401.",
+    "Step 5: Create tests/e2e/multi-user/usage.spec.js - Test usage endpoint: GET /api/multi/usage returns usage data for the user's keys. Verify filtering by period works.",
+    "Step 6: Create tests/e2e/multi-user/quota.spec.js - Test quota enforcement: set a very low quota for a test user, make requests that exceed the quota, verify 429 is returned with quota exceeded message.",
+    "Step 7: Create tests/e2e/multi-user/admin.spec.js - Test admin endpoints: create an admin user, verify they can list/update/delete other users. Verify non-admin users get 403.",
+    "Step 8: Create tests/e2e/multi-user/ui-flow.spec.js - Playwright browser tests for the user portal UI: navigate to /user-portal/register, fill form, submit, verify redirect to dashboard. Navigate to keys page, create a key, verify it appears. Navigate to usage page, verify it loads.",
+    "Step 9: Add npm script to package.json: 'test:e2e': 'npx playwright test tests/e2e/' and 'test:e2e:multi': 'npx playwright test tests/e2e/multi-user/'",
+    "Step 10: Run the Playwright tests and fix any issues that arise. Ensure all tests pass."
+  ],
+  "acceptance_criteria": [
+    "Playwright is installed and configured",
+    "All e2e test files are created covering registration, login, keys, usage, quota, admin, and UI flows",
+    "Tests can be run with `npx playwright test tests/e2e/multi-user/`",
+    "All tests pass against the running dev server with MULTI_USER_MODE=true"
+  ],
+  "verification": [
+    "MULTI_USER_MODE=true DATA_DIR=./test-data npx playwright test tests/e2e/multi-user/ passes all tests",
+    "npm run build still succeeds after test changes"
+  ],
+  "blocked_reason": null,
+  "findings": ""
+}
