@@ -196,6 +196,11 @@ export async function proxy(request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  // User portal pages are publicly accessible (they handle their own auth client-side)
+  if (pathname.startsWith("/user-portal")) {
+    return NextResponse.next();
+  }
+
   // Protect all dashboard routes
   if (pathname.startsWith("/dashboard")) {
     let requireLogin = true;

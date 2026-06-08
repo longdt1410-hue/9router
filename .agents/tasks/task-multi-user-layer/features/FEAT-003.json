@@ -2,7 +2,7 @@
   "id": "FEAT-003",
   "type": "feat",
   "description": "Create a minimal user portal UI at src/app/user-portal/ with login, registration, key management, and usage viewing pages. Simple, functional React pages using existing Tailwind CSS.",
-  "status": "pending",
+  "status": "in_progress",
   "steps": [
     "Step 1: Create src/app/user-portal/page.js - Landing/redirect page. If user has token cookie, redirect to /user-portal/dashboard. Otherwise redirect to /user-portal/login.",
     "Step 2: Create src/app/user-portal/login/page.js - Login form (username + password). On success, store JWT in cookie 'multi_user_token'. Redirect to dashboard.",
