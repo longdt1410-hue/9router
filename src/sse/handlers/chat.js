@@ -79,6 +79,20 @@ export async function handleChat(request, clientRawRequest = null) {
     }
   }
 
+  // Multi-user quota check (only when MULTI_USER_MODE is enabled)
+  if (process.env.MULTI_USER_MODE === "true" && apiKey) {
+    try {
+      const { checkQuotaForApiKey } = await import("@/lib/multiUser/quotaCheck");
+      const quotaResult = await checkQuotaForApiKey(apiKey);
+      if (quotaResult && !quotaResult.allowed) {
+        log.warn("QUOTA", `Quota exceeded for API key ${log.maskKey(apiKey)}`);
+        return errorResponse(429, "Quota exceeded. Daily limit reached.");
+      }
+    } catch (e) {
+      log.debug("QUOTA", `Quota check skipped: ${e.message}`);
+    }
+  }
+
   if (!modelStr) {
     log.warn("CHAT", "Missing model");
     return errorResponse(HTTP_STATUS.BAD_REQUEST, "Missing model");

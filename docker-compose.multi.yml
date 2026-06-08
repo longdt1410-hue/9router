@@ -1,0 +1,21 @@
+version: "3.8"
+
+services:
+  9router:
+    build: .
+    ports:
+      - "20128:20128"
+    environment:
+      - PORT=20128
+      - DATA_DIR=/data
+      - MULTI_USER_MODE=true
+      - MULTI_USER_JWT_SECRET=${MULTI_USER_JWT_SECRET:-}
+      - MULTI_USER_DEFAULT_QUOTA=${MULTI_USER_DEFAULT_QUOTA:-{"dailyRequests":1000,"dailyTokens":10000000}}
+      - MULTI_USER_REGISTRATION=${MULTI_USER_REGISTRATION:-true}
+      - MULTI_USER_MAX_KEYS_PER_USER=${MULTI_USER_MAX_KEYS_PER_USER:-5}
+    volumes:
+      - 9router-data:/data
+    restart: unless-stopped
+
+volumes:
+  9router-data:

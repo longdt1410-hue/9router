@@ -2,7 +2,7 @@
   "id": "FEAT-002",
   "type": "feat",
   "description": "Implement the multi-user layer: user database, session management, quota system, API routes, and minimal changes to existing files. All gated behind MULTI_USER_MODE=true env var.",
-  "status": "pending",
+  "status": "in_progress",
   "steps": [
     "Step 1: Add 'users' table definition to src/lib/db/schema.js TABLES object (append at end). Columns: id TEXT PRIMARY KEY, username TEXT UNIQUE NOT NULL, email TEXT UNIQUE, passwordHash TEXT NOT NULL, displayName TEXT, role TEXT DEFAULT 'user', quota TEXT (JSON: {dailyRequests, dailyTokens}), isActive INTEGER DEFAULT 1, createdAt TEXT NOT NULL, updatedAt TEXT NOT NULL. Add indexes for username, email.",
     "Step 2: Create src/lib/multiUser/userDb.js - CRUD operations for users table using getAdapter() pattern from existing repos. Functions: createUser(username, email, password), getUserByUsername(username), getUserByEmail(email), getUserById(id), updateUser(id, data), deleteUser(id), listUsers(), validateUserPassword(username, password). Use bcryptjs for password hashing. Use uuid v4 for IDs.",
