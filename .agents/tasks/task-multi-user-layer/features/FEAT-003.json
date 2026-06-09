@@ -1,0 +1,29 @@
+{
+  "id": "FEAT-003",
+  "type": "feat",
+  "description": "Create a minimal user portal UI at src/app/user-portal/ with login, registration, key management, and usage viewing pages. Simple, functional React pages using existing Tailwind CSS.",
+  "status": "completed",
+  "steps": [
+    "Step 1: Create src/app/user-portal/page.js - Landing/redirect page. If user has token cookie, redirect to /user-portal/dashboard. Otherwise redirect to /user-portal/login.",
+    "Step 2: Create src/app/user-portal/login/page.js - Login form (username + password). On success, store JWT in cookie 'multi_user_token'. Redirect to dashboard.",
+    "Step 3: Create src/app/user-portal/register/page.js - Registration form (username, email optional, password, confirm password). On success, auto-login and redirect to dashboard.",
+    "Step 4: Create src/app/user-portal/dashboard/page.js - Shows user profile summary, quick stats (today's requests/tokens), and links to keys and usage pages.",
+    "Step 5: Create src/app/user-portal/keys/page.js - List user's API keys (masked display), create new key (with name), delete key. Show copy button for full key (only on creation).",
+    "Step 6: Create src/app/user-portal/usage/page.js - Table/summary of usage stats by period (24h, 7d, 30d). Show requests count, tokens used, quota remaining.",
+    "Step 7: Create src/app/user-portal/layout.js - Shared layout with nav bar (Dashboard, Keys, Usage, Logout). Simple dark theme matching existing dashboard style.",
+    "Step 8: Add '/user-portal' to the dashboardGuard.js handling - user-portal pages should be publicly accessible (they handle their own auth via the multi_user_token cookie and client-side redirects)."
+  ],
+  "acceptance_criteria": [
+    "User portal pages render without errors",
+    "Login/register forms submit to /api/multi/* endpoints",
+    "Key management page can create and display API keys",
+    "Usage page shows stats from /api/multi/usage endpoint",
+    "npm run build completes successfully with all UI pages"
+  ],
+  "verification": [
+    "npm run build completes with exit code 0",
+    "User portal pages are served when accessing /user-portal/* in browser"
+  ],
+  "blocked_reason": null,
+  "findings": "All user portal pages created and build succeeds. Token stored in localStorage as multi_user_token. dashboardGuard.js updated to pass /user-portal paths through without admin auth."
+}

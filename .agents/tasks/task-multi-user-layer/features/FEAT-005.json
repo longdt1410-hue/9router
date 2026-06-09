@@ -1,0 +1,26 @@
+{
+  "id": "FEAT-005",
+  "type": "fix",
+  "description": "Address review findings: fix DELETE key mismatch, mask API keys in GET, deactivate orphaned keys on user deletion, bootstrap first user as admin, add password length cap at 72 chars.",
+  "status": "completed",
+  "steps": [
+    "Step 1: Fix DELETE handler in src/app/api/multi/keys/route.js to also read key ID from request body as fallback when query param is empty.",
+    "Step 2: Mask API keys in GET /api/multi/keys response - show only first 10 chars + '...' instead of full key value.",
+    "Step 3: In src/lib/multiUser/userDb.js deleteUser(), deactivate orphaned apiKeys (set isActive=0) for keys linked in userApiKeys before deleting.",
+    "Step 4: In src/app/api/multi/register/route.js, check if users table is empty and set first user role to admin.",
+    "Step 5: Add password max length validation (72 chars) in register and profile routes."
+  ],
+  "acceptance_criteria": [
+    "DELETE key works when ID sent in request body",
+    "GET /api/multi/keys returns masked key values (first 10 chars + '...')",
+    "Deleting a user deactivates their linked API keys",
+    "First registered user gets admin role",
+    "Passwords longer than 72 characters are rejected with an error"
+  ],
+  "verification": [
+    "npm run build passes",
+    "npx playwright test tests/e2e/multi-user/ passes"
+  ],
+  "blocked_reason": null,
+  "findings": "All 5 review fixes applied cleanly. All 36 Playwright e2e tests continue to pass. Build succeeds. The admin bootstrap uses a dynamic import of getAdapter and updateUser in the register route to check user count before creating the first user. The key masking uses first 10 chars + '...' which starts with '9r-mu-' prefix so masked keys are still recognizable."
+}

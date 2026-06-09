@@ -29,6 +29,8 @@ const PUBLIC_API_PATHS = [
   "/api/auth/oidc",
   "/api/version",
   "/api/settings/require-login",
+  "/api/multi/register",
+  "/api/multi/login",
 ];
 
 // Public top-level prefixes (LLM API endpoints with their own API key auth).
@@ -187,9 +189,16 @@ export async function proxy(request) {
   // Deny-by-default for /api/* — public allow-list bypasses, everything else requires auth.
   if (pathname.startsWith("/api/")) {
     if (isPublicApi(pathname)) return NextResponse.next();
+    // Multi-user routes handle their own auth via user JWT tokens
+    if (pathname.startsWith("/api/multi/")) return NextResponse.next();
     if (await hasValidCliToken(request) || await isAuthenticated(request))
       return NextResponse.next();
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  // User portal pages are publicly accessible (they handle their own auth client-side)
+  if (pathname.startsWith("/user-portal")) {
+    return NextResponse.next();
   }
 
   // Protect all dashboard routes

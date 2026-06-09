@@ -1,0 +1,40 @@
+{
+  "id": "FEAT-002",
+  "type": "feat",
+  "description": "Implement the multi-user layer: user database, session management, quota system, API routes, and minimal changes to existing files. All gated behind MULTI_USER_MODE=true env var.",
+  "status": "completed",
+  "steps": [
+    "Step 1: Add 'users' table definition to src/lib/db/schema.js TABLES object (append at end). Columns: id TEXT PRIMARY KEY, username TEXT UNIQUE NOT NULL, email TEXT UNIQUE, passwordHash TEXT NOT NULL, displayName TEXT, role TEXT DEFAULT 'user', quota TEXT (JSON: {dailyRequests, dailyTokens}), isActive INTEGER DEFAULT 1, createdAt TEXT NOT NULL, updatedAt TEXT NOT NULL. Add indexes for username, email.",
+    "Step 2: Create src/lib/multiUser/userDb.js - CRUD operations for users table using getAdapter() pattern from existing repos. Functions: createUser(username, email, password), getUserByUsername(username), getUserByEmail(email), getUserById(id), updateUser(id, data), deleteUser(id), listUsers(), validateUserPassword(username, password). Use bcryptjs for password hashing. Use uuid v4 for IDs.",
+    "Step 3: Create src/lib/multiUser/userSession.js - JWT-based user sessions (separate from admin dashboard JWT). Functions: createUserToken(user), verifyUserToken(token), getUserFromRequest(request). Use jose SignJWT/jwtVerify with a separate secret (MULTI_USER_JWT_SECRET env var or auto-generated file in DATA_DIR/multi-user-jwt-secret). Token payload: { userId, username, role }. Expiration: 7d.",
+    "Step 4: Create src/lib/multiUser/quotaManager.js - Per-user quota enforcement. Functions: checkQuota(userId, apiKey), getUserUsageToday(userId), getDefaultQuota(). Query usageHistory table filtering by apiKey where apiKey belongs to the user. Default quota from MULTI_USER_DEFAULT_QUOTA env var (JSON) or { dailyRequests: 1000, dailyTokens: 10000000 }. Returns { allowed: boolean, remaining: {...}, used: {...} }.",
+    "Step 5: Create src/lib/multiUser/middleware.js - Auth middleware helper for multi-user API routes. Functions: requireUserAuth(request) -> returns {user} or NextResponse error 401, requireAdminAuth(request) -> returns {user} or error 403, isMultiUserMode() -> checks MULTI_USER_MODE env var.",
+    "Step 6: Create src/lib/multiUser/index.js - Barrel export for all multiUser modules.",
+    "Step 7: Create src/app/api/multi/register/route.js - POST endpoint for user registration. Validates username (3-30 chars, alphanumeric+underscore), email (optional), password (min 6 chars). Returns user object + JWT token. Only works when MULTI_USER_MODE=true. If MULTI_USER_REGISTRATION=false env var, return 403.",
+    "Step 8: Create src/app/api/multi/login/route.js - POST endpoint for user login. Accepts {username, password}. Returns JWT token + user profile. Rate limited (reuse loginLimiter pattern).",
+    "Step 9: Create src/app/api/multi/profile/route.js - GET: returns current user profile + quota info. PATCH: update displayName, email, password. Requires user auth.",
+    "Step 10: Create src/app/api/multi/keys/route.js - GET: list user's API keys (filter apiKeys table where the key was created by this user - store userId in a new field or link table). POST: create new API key for user (max 5 keys per user). DELETE: delete user's own key. Requires user auth.",
+    "Step 11: Create src/app/api/multi/usage/route.js - GET: returns user's usage stats filtered by their API keys. Query params: period (24h, 7d, 30d). Requires user auth.",
+    "Step 12: Create src/app/api/multi/admin/users/route.js - GET: list all users (admin only). PATCH: update user quota/role/isActive (admin only). DELETE: delete user (admin only).",
+    "Step 13: Modify src/dashboardGuard.js - Add '/api/multi/register', '/api/multi/login' to PUBLIC_API_PATHS array. Add '/api/multi' handling: if path starts with /api/multi/ and not in public list, pass through (the route handlers themselves do user-token auth via middleware.js).",
+    "Step 14: Modify src/lib/db/schema.js - Add 'userApiKeys' linking table: userId TEXT NOT NULL, apiKeyId TEXT NOT NULL, PRIMARY KEY(userId, apiKeyId), with indexes. This links users to their API keys without modifying the existing apiKeys table structure.",
+    "Step 15: Modify src/sse/handlers/chat.js - After the existing apiKey validation block (around line 67-75), add ~5 lines: if MULTI_USER_MODE is true and apiKey is valid, call quotaManager.checkQuota(). If not allowed, return 429 with quota exceeded message. Import quotaManager conditionally.",
+    "Step 16: Create .env.multi.example with all multi-user env vars documented: MULTI_USER_MODE, MULTI_USER_JWT_SECRET, MULTI_USER_DEFAULT_QUOTA, MULTI_USER_REGISTRATION, MULTI_USER_MAX_KEYS_PER_USER.",
+    "Step 17: Create docker-compose.multi.yml showing how to run 9router with multi-user mode enabled."
+  ],
+  "acceptance_criteria": [
+    "All new files created under src/lib/multiUser/ and src/app/api/multi/",
+    "Users table is defined in schema.js and auto-created on DB init",
+    "User registration, login, profile, key management, and usage endpoints all work",
+    "Quota check integrated into chat handler, gated by MULTI_USER_MODE env var",
+    "dashboardGuard.js allows public access to /api/multi/register and /api/multi/login",
+    "When MULTI_USER_MODE is not set or false, all multi-user routes return 404 or are effectively disabled",
+    "npm run build completes successfully with all new code"
+  ],
+  "verification": [
+    "npm run build completes with exit code 0",
+    "New API routes are accessible when MULTI_USER_MODE=true and the dev server is running"
+  ],
+  "blocked_reason": null,
+  "findings": "Build passes cleanly. Added .env.multi.example exception to .gitignore since .env* pattern blocked it. Created quotaCheck.js helper to decouple quota logic from chat handler via dynamic import. All 6 multi-user routes appear in build output."
+}

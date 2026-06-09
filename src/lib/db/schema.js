@@ -148,6 +148,34 @@ export const TABLES = {
       "CREATE INDEX IF NOT EXISTS idx_rd_conn ON requestDetails(connectionId)",
     ],
   },
+  users: {
+    columns: {
+      id: "TEXT PRIMARY KEY",
+      username: "TEXT UNIQUE NOT NULL",
+      email: "TEXT UNIQUE",
+      passwordHash: "TEXT NOT NULL",
+      displayName: "TEXT",
+      role: "TEXT DEFAULT 'user'",
+      quota: "TEXT",
+      isActive: "INTEGER DEFAULT 1",
+      createdAt: "TEXT NOT NULL",
+      updatedAt: "TEXT NOT NULL",
+    },
+    indexes: [
+      "CREATE INDEX IF NOT EXISTS idx_users_username ON users(username)",
+      "CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)",
+    ],
+  },
+  userApiKeys: {
+    columns: {
+      userId: "TEXT NOT NULL",
+      apiKeyId: "TEXT NOT NULL",
+    },
+    primaryKey: "PRIMARY KEY (userId, apiKeyId)",
+    indexes: [
+      "CREATE INDEX IF NOT EXISTS idx_uak_userId ON userApiKeys(userId)",
+    ],
+  },
 };
 
 export function buildCreateTableSql(name, def) {
