@@ -2,7 +2,7 @@
   "id": "FEAT-005",
   "type": "fix",
   "description": "Address review findings: fix DELETE key mismatch, mask API keys in GET, deactivate orphaned keys on user deletion, bootstrap first user as admin, add password length cap at 72 chars.",
-  "status": "in_progress",
+  "status": "completed",
   "steps": [
     "Step 1: Fix DELETE handler in src/app/api/multi/keys/route.js to also read key ID from request body as fallback when query param is empty.",
     "Step 2: Mask API keys in GET /api/multi/keys response - show only first 10 chars + '...' instead of full key value.",
@@ -22,5 +22,5 @@
     "npx playwright test tests/e2e/multi-user/ passes"
   ],
   "blocked_reason": null,
-  "findings": null
+  "findings": "All 5 review fixes applied cleanly. All 36 Playwright e2e tests continue to pass. Build succeeds. The admin bootstrap uses a dynamic import of getAdapter and updateUser in the register route to check user count before creating the first user. The key masking uses first 10 chars + '...' which starts with '9r-mu-' prefix so masked keys are still recognizable."
 }
