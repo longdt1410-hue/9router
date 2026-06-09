@@ -2,7 +2,7 @@
   "id": "FEAT-004",
   "type": "feat",
   "description": "Create Playwright end-to-end tests covering the full multi-user flow: registration, login, key management, usage tracking, and quota enforcement. Tests run against the actual dev server with MULTI_USER_MODE=true.",
-  "status": "in_progress",
+  "status": "completed",
   "steps": [
     "Step 1: Install Playwright as a dev dependency in the project root: npm install -D @playwright/test. Create playwright.config.js at project root with baseURL http://localhost:20128, webServer config to start the dev server with MULTI_USER_MODE=true DATA_DIR=./test-data.",
     "Step 2: Create tests/e2e/multi-user/registration.spec.js - Test user registration flow: POST /api/multi/register with valid data returns 201 + token; duplicate username returns 409; invalid password returns 400; when MULTI_USER_REGISTRATION=false returns 403.",
@@ -26,5 +26,5 @@
     "npm run build still succeeds after test changes"
   ],
   "blocked_reason": null,
-  "findings": ""
+  "findings": "1. DATA_DIR must be set to an absolute path outside the project directory (e.g., /tmp/9router-test-data) to avoid Next.js dev server hot-reload issues (Manifest file is empty error). 2. The first registered user does NOT automatically become admin - the codebase sets all users to role='user'. Admin tests use better-sqlite3 to directly promote a user in the SQLite DB at DATA_DIR/db/data.sqlite. 3. Chromium requires system libraries (nss, libxkbcommon, atk, cups-libs, etc.) - run npx playwright install-deps or install manually on Amazon Linux. 4. The webServer config uses reuseExistingServer to avoid startup delays on repeated local runs. 5. All 36 tests pass consistently: 7 admin, 6 keys, 4 login, 3 quota, 6 registration, 6 UI flow, 4 usage."
 }
