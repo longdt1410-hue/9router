@@ -89,6 +89,13 @@ export async function updateUser(id, data) {
 
 export async function deleteUser(id) {
   const db = await getAdapter();
+  // Deactivate API keys linked to this user before removing links
+  const links = db.all(`SELECT apiKeyId FROM userApiKeys WHERE userId = ?`, [id]);
+  if (links && links.length > 0) {
+    const ids = links.map((l) => l.apiKeyId);
+    const placeholders = ids.map(() => "?").join(",");
+    db.run(`UPDATE apiKeys SET isActive = 0 WHERE id IN (${placeholders})`, ids);
+  }
   const res = db.run(`DELETE FROM users WHERE id = ?`, [id]);
   db.run(`DELETE FROM userApiKeys WHERE userId = ?`, [id]);
   return (res?.changes ?? 0) > 0;

@@ -29,7 +29,7 @@ export async function GET(request) {
     return NextResponse.json({
       keys: keys.map((k) => ({
         id: k.id,
-        key: k.key,
+        key: k.key ? k.key.slice(0, 10) + "..." : "",
         name: k.name,
         isActive: k.isActive === 1 || k.isActive === true,
         createdAt: k.createdAt,
@@ -100,7 +100,17 @@ export async function DELETE(request) {
 
   try {
     const { searchParams } = new URL(request.url);
-    const keyId = searchParams.get("id");
+    let keyId = searchParams.get("id");
+
+    // Fallback: read key ID from request body if not in query params
+    if (!keyId) {
+      try {
+        const body = await request.json();
+        keyId = body?.id || null;
+      } catch {
+        // No body or invalid JSON
+      }
+    }
 
     if (!keyId) {
       return NextResponse.json({ error: "Key ID is required" }, { status: 400 });

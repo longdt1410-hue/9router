@@ -47,6 +47,9 @@ export async function PATCH(request) {
       if (body.password.length < 6) {
         return NextResponse.json({ error: "Password must be at least 6 characters" }, { status: 400 });
       }
+      if (body.password.length > 72) {
+        return NextResponse.json({ error: "Password must not exceed 72 characters" }, { status: 400 });
+      }
       allowedFields.password = body.password;
     }
 

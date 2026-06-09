@@ -33,6 +33,9 @@ export async function POST(request) {
     if (!password || typeof password !== "string" || password.length < 6) {
       return NextResponse.json({ error: "Password must be at least 6 characters" }, { status: 400 });
     }
+    if (password.length > 72) {
+      return NextResponse.json({ error: "Password must not exceed 72 characters" }, { status: 400 });
+    }
 
     // Validate email (optional)
     if (email && typeof email === "string") {
@@ -51,7 +54,20 @@ export async function POST(request) {
       return NextResponse.json({ error: "Username already exists" }, { status: 409 });
     }
 
+    // First registered user becomes admin
+    const { getAdapter } = await import("@/lib/db/driver");
+    const db = await getAdapter();
+    const countRow = db.get(`SELECT COUNT(*) as cnt FROM users`);
+    const isFirstUser = !countRow || countRow.cnt === 0;
+
     const user = await createUser(username, email || null, password);
+
+    if (isFirstUser) {
+      const { updateUser } = await import("@/lib/multiUser/userDb");
+      await updateUser(user.id, { role: "admin" });
+      user.role = "admin";
+    }
+
     const token = await createUserToken(user);
 
     return NextResponse.json({ user, token }, { status: 201 });
