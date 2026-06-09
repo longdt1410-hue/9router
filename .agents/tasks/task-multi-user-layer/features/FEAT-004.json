@@ -2,7 +2,7 @@
   "id": "FEAT-004",
   "type": "feat",
   "description": "Create Playwright end-to-end tests covering the full multi-user flow: registration, login, key management, usage tracking, and quota enforcement. Tests run against the actual dev server with MULTI_USER_MODE=true.",
-  "status": "pending",
+  "status": "in_progress",
   "steps": [
     "Step 1: Install Playwright as a dev dependency in the project root: npm install -D @playwright/test. Create playwright.config.js at project root with baseURL http://localhost:20128, webServer config to start the dev server with MULTI_USER_MODE=true DATA_DIR=./test-data.",
     "Step 2: Create tests/e2e/multi-user/registration.spec.js - Test user registration flow: POST /api/multi/register with valid data returns 201 + token; duplicate username returns 409; invalid password returns 400; when MULTI_USER_REGISTRATION=false returns 403.",
